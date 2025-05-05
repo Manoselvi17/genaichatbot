@@ -12,29 +12,37 @@ def load_data():
 
 df = load_data()
 
+# Optional: show available columns for debugging
+# st.write("Available columns:", df.columns.tolist())
+
 # Page setup
 st.set_page_config(page_title="Travel Planner", layout="wide")
 st.title("🌍 Smart Travel Planner")
 
-# Sidebar input
+# Sidebar inputs
 st.sidebar.header("✈️ Plan Your Trip")
 num_people = st.sidebar.number_input("How many people?", min_value=1, max_value=10, value=1)
 num_days = st.sidebar.slider("How many days?", min_value=1, max_value=30, value=5)
 budget = st.sidebar.number_input("Your total budget (USD)", min_value=100, max_value=10000, value=2000)
 
-# Estimate cost per trip
-df["Total Estimated Cost"] = df["Transportation cost"] + (df["Accommodation cost per day"] * num_days * num_people)
+# Use exact column names from your CSV
+# Replace with your actual column name from the CSV
+accommodation_col = "Accommodation cost per day"  # Confirmed from your dataset
+transport_col = "Transportation cost"
 
-# Filter trips within budget
+# Calculate total estimated cost
+df["Total Estimated Cost"] = df[transport_col] + (df[accommodation_col] * num_days * num_people)
+
+# Filter by budget
 filtered_df = df[df["Total Estimated Cost"] <= budget]
 
-# Results
+# Display results
 st.subheader("🧳 Trips Matching Your Preferences")
 if filtered_df.empty:
-    st.warning("No trips match your criteria. Try increasing your budget or reducing days/people.")
+    st.warning("No trips match your criteria. Try adjusting your budget or trip duration.")
 else:
     st.dataframe(filtered_df[["Destination", "Transportation type", "Total Estimated Cost"]].sort_values(by="Total Estimated Cost"))
 
-# Optional: show full details
+# Optional full details
 with st.expander("Show full trip details"):
     st.dataframe(filtered_df)
