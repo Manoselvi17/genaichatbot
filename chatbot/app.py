@@ -4,6 +4,7 @@ import streamlit as st
 
 # Load dataset
 path = 'chatbot/traveldetail.csv'
+
 def load_data():
     if not os.path.exists(path):
         st.error(f"File not found at {path}")
@@ -12,8 +13,8 @@ def load_data():
 
 df = load_data()
 
-# Optional: show available columns for debugging
-# st.write("Available columns:", df.columns.tolist())
+# Display available columns for verification
+st.write("Available columns:", df.columns.tolist())
 
 # Page setup
 st.set_page_config(page_title="Travel Planner", layout="wide")
@@ -26,8 +27,7 @@ num_days = st.sidebar.slider("How many days?", min_value=1, max_value=30, value=
 budget = st.sidebar.number_input("Your total budget (USD)", min_value=100, max_value=10000, value=2000)
 
 # Use exact column names from your CSV
-# Replace with your actual column name from the CSV
-accommodation_col = "Accommodation cost per day"  # Confirmed from your dataset
+accommodation_col = "Accommodation cost per person per day"
 transport_col = "Transportation cost"
 
 # Calculate total estimated cost
