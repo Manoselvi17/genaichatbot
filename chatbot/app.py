@@ -2,6 +2,9 @@ import os
 import pandas as pd
 import streamlit as st
 
+# Set page config FIRST
+st.set_page_config(page_title="Travel Planner", layout="wide")
+
 # Load dataset
 path = 'chatbot/traveldetail.csv'
 
@@ -13,11 +16,7 @@ def load_data():
 
 df = load_data()
 
-# Display available columns for verification
-st.write("Available columns:", df.columns.tolist())
-
-# Page setup
-st.set_page_config(page_title="Travel Planner", layout="wide")
+# Page title
 st.title("🌍 Smart Travel Planner")
 
 # Sidebar inputs
@@ -26,14 +25,14 @@ num_people = st.sidebar.number_input("How many people?", min_value=1, max_value=
 num_days = st.sidebar.slider("How many days?", min_value=1, max_value=30, value=5)
 budget = st.sidebar.number_input("Your total budget (USD)", min_value=100, max_value=10000, value=2000)
 
-# Use exact column names from your CSV
-accommodation_col = "Accommodation cost per person per day"
+# Use correct column names
+accommodation_col = "Accommodation cost"
 transport_col = "Transportation cost"
 
 # Calculate total estimated cost
 df["Total Estimated Cost"] = df[transport_col] + (df[accommodation_col] * num_days * num_people)
 
-# Filter by budget
+# Filter trips by budget
 filtered_df = df[df["Total Estimated Cost"] <= budget]
 
 # Display results
