@@ -2,27 +2,39 @@ import os
 import pandas as pd
 import streamlit as st
 
-# Path where the data file should be located
+# Set relative path to the CSV
 path = 'chatbot/traveldetail.csv'
-  # Update this path to where your file should be
 
-# Display the current working directory using Streamlit
-st.write(f"Current working directory: {os.getcwd()}")
-
-# Function to load data
+# Load data
 def load_data():
-    # Check if file exists before loading
     if not os.path.exists(path):
         st.error(f"File not found at {path}")
-        raise FileNotFoundError(f"'{path}' not found. Please upload it in the app directory.")
-    else:
-        st.write(f"File found at {path}")
-        df = pd.read_csv(path)  # Replace this with your data loading logic
-        return df
+        raise FileNotFoundError(f"'{path}' not found.")
+    return pd.read_csv(path)
 
-# Attempt to load the data and handle potential error
-try:
-    df = load_data()
-    st.write(f"Data loaded successfully: {df.head()}")  # Display the first few rows of the data for verification
-except FileNotFoundError as e:
-    st.error(f"Error: {e}")
+# Load and display data
+df = load_data()
+st.title("✈️ Travel Details Explorer")
+st.success("Data loaded successfully!")
+
+# Show raw data
+if st.checkbox("Show raw data"):
+    st.dataframe(df)
+
+# Filter section
+st.subheader("🔍 Filter Data")
+destination = st.selectbox("Select Destination", options=["All"] + df["Destination"].unique().tolist())
+transport = st.selectbox("Select Transportation Type", options=["All"] + df["Transportation type"].unique().tolist())
+
+filtered_df = df.copy()
+if destination != "All":
+    filtered_df = filtered_df[filtered_df["Destination"] == destination]
+if transport != "All":
+    filtered_df = filtered_df[filtered_df["Transportation type"] == transport]
+
+st.write(f"Showing {len(filtered_df)} matching records:")
+st.dataframe(filtered_df)
+
+# Stats
+st.subheader("📊 Summary Statistics")
+st.write(filtered_df.describe())
