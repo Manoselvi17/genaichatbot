@@ -1,39 +1,27 @@
-import streamlit as st
-import pandas as pd
 import os
-import pickle
-from model import preprocess_input
+import pandas as pd
 
-# 🔽 Add the load_data function here
+# Path where the data file should be located
+path = 'your_file_path_here'  # Update this path to where your file should be
+
+# Debugging: Print the current working directory to see where the app is running
+print(f"Current working directory: {os.getcwd()}")
+
+# Function to load data
 def load_data():
-    path = "traveldetail.csv"
+    # Check if file exists before loading
     if not os.path.exists(path):
+        print(f"File not found at {path}")
         raise FileNotFoundError(f"'{path}' not found. Please upload it in the app directory.")
-    return pd.read_csv(path)
+    else:
+        print(f"File found at {path}")
+        # Replace this with your data loading logic (e.g., reading a CSV file)
+        df = pd.read_csv(path)
+        return df
 
-# 🔽 Load the CSV using the new function
-df = load_data()
-
-# Example Streamlit UI (expand this as needed)
-st.title("Travel Cost Predictor")
-
-duration = st.number_input("Enter duration (days):", min_value=1)
-transport = st.selectbox("Select transportation mode:", df["Transport"].unique())
-
-if st.button("Predict Cost"):
-    user_input = {
-        "Duration (days)": duration,
-        "Transport": transport
-    }
-    input_df = preprocess_input(pd.DataFrame([user_input]), df)
-
-    # Load model and scaler
-    with open("knn_model.pkl", "rb") as model_file:
-        model = pickle.load(model_file)
-    with open("scaler.pkl", "rb") as scaler_file:
-        scaler = pickle.load(scaler_file)
-
-    input_scaled = scaler.transform(input_df)
-    prediction = model.predict(input_scaled)
-    st.success(f"Estimated total cost: ${prediction[0]:,.2f}")
-    print(f"Current working directory: {os.getcwd()}")
+# Attempt to load the data and handle potential error
+try:
+    df = load_data()
+    print(f"Data loaded successfully: {df.head()}")  # Display the first few rows of the data for verification
+except FileNotFoundError as e:
+    print(f"Error: {e}")
