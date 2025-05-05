@@ -8,7 +8,7 @@ from model import preprocess_input
 def load_data():
     path = "traveldetail.csv"
     if not os.path.exists(path):
-        raise FileNotFoundError(f"'{path}' not found. Please make sure it is in the app directory.")
+        raise FileNotFoundError(f"'{path}' not found. Please upload it in the app directory.")
     return pd.read_csv(path)
 
 # 🔽 Load the CSV using the new function
