@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 
 # Path where the data file should be located
-path = 'your_file_path_here'  # Update this path to where your file should be
+path = 'traveldetail.csv'  # Update this path to where your file should be
 
 # Display the current working directory using Streamlit
 st.write(f"Current working directory: {os.getcwd()}")
