@@ -2,39 +2,39 @@ import os
 import pandas as pd
 import streamlit as st
 
-# Set relative path to the CSV
+# Load dataset
 path = 'chatbot/traveldetail.csv'
-
-# Load data
 def load_data():
     if not os.path.exists(path):
         st.error(f"File not found at {path}")
         raise FileNotFoundError(f"'{path}' not found.")
     return pd.read_csv(path)
 
-# Load and display data
 df = load_data()
-st.title("✈️ Travel Details Explorer")
-st.success("Data loaded successfully!")
 
-# Show raw data
-if st.checkbox("Show raw data"):
-    st.dataframe(df)
+# Page setup
+st.set_page_config(page_title="Travel Planner", layout="wide")
+st.title("🌍 Smart Travel Planner")
 
-# Filter section
-st.subheader("🔍 Filter Data")
-destination = st.selectbox("Select Destination", options=["All"] + df["Destination"].unique().tolist())
-transport = st.selectbox("Select Transportation Type", options=["All"] + df["Transportation type"].unique().tolist())
+# Sidebar input
+st.sidebar.header("✈️ Plan Your Trip")
+num_people = st.sidebar.number_input("How many people?", min_value=1, max_value=10, value=1)
+num_days = st.sidebar.slider("How many days?", min_value=1, max_value=30, value=5)
+budget = st.sidebar.number_input("Your total budget (USD)", min_value=100, max_value=10000, value=2000)
 
-filtered_df = df.copy()
-if destination != "All":
-    filtered_df = filtered_df[filtered_df["Destination"] == destination]
-if transport != "All":
-    filtered_df = filtered_df[filtered_df["Transportation type"] == transport]
+# Estimate cost per trip
+df["Total Estimated Cost"] = df["Transportation cost"] + (df["Accommodation cost per day"] * num_days * num_people)
 
-st.write(f"Showing {len(filtered_df)} matching records:")
-st.dataframe(filtered_df)
+# Filter trips within budget
+filtered_df = df[df["Total Estimated Cost"] <= budget]
 
-# Stats
-st.subheader("📊 Summary Statistics")
-st.write(filtered_df.describe())
+# Results
+st.subheader("🧳 Trips Matching Your Preferences")
+if filtered_df.empty:
+    st.warning("No trips match your criteria. Try increasing your budget or reducing days/people.")
+else:
+    st.dataframe(filtered_df[["Destination", "Transportation type", "Total Estimated Cost"]].sort_values(by="Total Estimated Cost"))
+
+# Optional: show full details
+with st.expander("Show full trip details"):
+    st.dataframe(filtered_df)
