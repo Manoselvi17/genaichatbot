@@ -36,3 +36,4 @@ if st.button("Predict Cost"):
     input_scaled = scaler.transform(input_df)
     prediction = model.predict(input_scaled)
     st.success(f"Estimated total cost: ${prediction[0]:,.2f}")
+    print(f"Current working directory: {os.getcwd()}")
