@@ -1,47 +1,38 @@
 import streamlit as st
 import pandas as pd
+import os
+import pickle
+from model import preprocess_input
 
-# Load data
-@st.cache_data
+# 🔽 Add the load_data function here
 def load_data():
-    df = pd.read_csv("traveldetail.csv")
-    df.columns = df.columns.str.strip()
-    return df
+    path = "traveldetail.csv"
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"'{path}' not found. Please make sure it is in the app directory.")
+    return pd.read_csv(path)
 
+# 🔽 Load the CSV using the new function
 df = load_data()
 
-st.title("🌍 Travel Trip Planner Chatbot")
-st.write("Plan your next adventure with a few simple choices!")
+# Example Streamlit UI (expand this as needed)
+st.title("Travel Cost Predictor")
 
-# Step 1: Choose Destination
-destinations = df['Destination'].dropna().unique()
-destination = st.selectbox("📍 Choose your destination:", sorted(destinations))
+duration = st.number_input("Enter duration (days):", min_value=1)
+transport = st.selectbox("Select transportation mode:", df["Transport"].unique())
 
-# Step 2: Choose Accommodation Type
-accommodations = df['Accommodation type'].dropna().unique()
-accommodation = st.selectbox("🏨 Choose accommodation type:", sorted(accommodations))
+if st.button("Predict Cost"):
+    user_input = {
+        "Duration (days)": duration,
+        "Transport": transport
+    }
+    input_df = preprocess_input(pd.DataFrame([user_input]), df)
 
-# Step 3: Choose Transportation Type
-transportations = df['Transportation type'].dropna().unique()
-transport = st.selectbox("🚗 Choose transportation type:", sorted(transportations))
+    # Load model and scaler
+    with open("knn_model.pkl", "rb") as model_file:
+        model = pickle.load(model_file)
+    with open("scaler.pkl", "rb") as scaler_file:
+        scaler = pickle.load(scaler_file)
 
-# Button to show itinerary
-if st.button("🎒 Show Matching Trips"):
-    filtered = df[
-        (df['Destination'].str.title() == destination.title()) &
-        (df['Accommodation type'].str.title() == accommodation.title()) &
-        (df['Transportation type'].str.title() == transport.title())
-    ]
-
-    if filtered.empty:
-        st.warning("❌ No matching trips found. Try different choices.")
-    else:
-        st.success(f"✅ Found {len(filtered)} trip(s) matching your preferences!")
-        st.dataframe(filtered[['Trip ID', 'Start date', 'End date', 'Duration (days)',
-                               'Accommodation cost', 'Transportation cost']])
-
-# Optional: Show top destinations
-st.markdown("---")
-st.subheader("📊 Top 5 Most Visited Destinations")
-top_dest = df['Destination'].value_counts().head(5)
-st.bar_chart(top_dest)
+    input_scaled = scaler.transform(input_df)
+    prediction = model.predict(input_scaled)
+    st.success(f"Estimated total cost: ${prediction[0]:,.2f}")
