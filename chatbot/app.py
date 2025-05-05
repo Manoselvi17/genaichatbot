@@ -29,8 +29,15 @@ budget = st.sidebar.number_input("Your total budget (USD)", min_value=100, max_v
 accommodation_col = "Accommodation cost"
 transport_col = "Transportation cost"
 
+# Ensure that 'Transportation cost' and 'Accommodation cost' are numeric
+df[transport_col] = pd.to_numeric(df[transport_col], errors='coerce')
+df[accommodation_col] = pd.to_numeric(df[accommodation_col], errors='coerce')
+
 # Calculate total estimated cost
 df["Total Estimated Cost"] = df[transport_col] + (df[accommodation_col] * num_days * num_people)
+
+# Ensure that 'Total Estimated Cost' is numeric
+df["Total Estimated Cost"] = pd.to_numeric(df["Total Estimated Cost"], errors='coerce')
 
 # Filter trips by budget
 filtered_df = df[df["Total Estimated Cost"] <= budget]
